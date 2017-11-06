@@ -20,9 +20,9 @@
 
                     </pre>
                     <div id="auth">
+                        <input type="text" id="type"><input/>
                         <input type="text" id=""><input/>
-                        <input type="text" id=""><input/>
-                        <input type="text" id=""><input/>
+                        <input type="text" id="message"><input/>
                         <input type="text" id=""><input/>
                     </div>
                     <div id="htua">
@@ -34,21 +34,21 @@
             </div>
         </div>
         <script>
-            var lPass = "", rPass = "";
+            var lPass = "", rPass = "", feed = document.getElementById("feed");
             var WS = function () {
                 var nws = new WebSocket("ws://" + window.location.host + "/ws-phone");
                 nws.onmessage( function(msg) {
                     obj = JSON.parse(msg.data);
-                    if (obj.Pass == rPass) {
-                        
+                    if (obj.Type != "init" && obj.Type != "error" && obj.Pass == rPass) {
+                        feed.innerHTML += "<div class=\"confirm\">" + obj.Message + "</div>";
                     } else if (obj.Type == "init") {
                         if (obj.Message.toLowerCase() == "connected") {
-                            
+                            rPass = obj.Pass;
                         } else {
-
+                            feed.innerHTML += "<div class=\"error\">" + obj.Message + "</div>";
                         }
                     } else {
-
+                        feed.innerHTML += "<div class=\"error\">" + obj.Message + "</div>";
                     }
                 });
                 return nws;

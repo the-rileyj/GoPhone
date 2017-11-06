@@ -148,6 +148,14 @@ func main() {
 					}
 				}
 			}
+		} else {
+			if rmsg, err := json.Marshal(phoneMessage{"Incorrect Password", "init", "", pmsg.Pass}); err == nil {
+				if err = s.Write(rmsg); err != nil {
+					fmt.Printf("Error sending auth error message: %s\n", err)
+				}
+			} else {
+				fmt.Printf("Error Marshalling auth error message: %s\n", err)
+			}
 		}
 	})
 	r.Run(":5000")
