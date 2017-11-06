@@ -23,6 +23,13 @@ type datAuth struct {
 	Token  string `json:"token"`
 }
 
+type phoneMessage struct {
+	Message string
+	Type    string
+	Number  string
+	Pass    string
+}
+
 var tpl *template.Template
 
 func main() {
@@ -43,9 +50,9 @@ func main() {
 
 	//Get the ID, and then get the lyrics with the returning ID from that function
 	//lyrics := getSongLyrics(getSongID(artist, title, dat.Lkey), dat.Lkey)
-	client := twilio.NewClient(dat.Sid, dat.Token, nil)
-	tpl := template.Must(template.New("").ParseGlob("*.gohtml"))
-	r, m := gin.Default(), melody.New()
+	client, m, r, tpl := twilio.NewClient(dat.Sid, dat.Token, nil), melody.New(), gin.Default(), template.Must(template.New("").ParseGlob("*.gohtml"))
+	//tpl := template.Must(template.New("").ParseGlob("*.gohtml"))
+	//r, m := gin.Default(), melody.New()
 	//m := melody.New()
 	r.GET("/phone", func(c *gin.Context) {
 		tpl.ExecuteTemplate(c.Writer, "index.gohtml", nil)
