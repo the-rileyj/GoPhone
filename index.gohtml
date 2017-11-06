@@ -19,46 +19,68 @@
                     <pre id="feed">
 
                     </pre>
-                    <div id="auth">
-                        <input type="text" id="type"><input/>
-                        <input type="text" id=""><input/>
-                        <input type="text" id="message"><input/>
-                        <input type="text" id=""><input/>
+                    <div id="auth" style="display: none;">
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Text
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item">Call</a>
+                                <a class="dropdown-item">Text</a>
+                            </div>
+                        </div>
+                        <input type="text" id="type" placeholder="Call/Text"></input>
+                        <input type="text" id="to"></input>
+                        <input type="text" id="message"></input>
                     </div>
                     <div id="htua">
-                        <input type="text" id="password"><input/>
+                        <input type="text" id="password"></input>
                     </div>
-                    
+                    <button id="sub">Submit</button>
                 </div>
                 <div class="col-sm-1"></div>
             </div>
         </div>
         <script>
             var lPass = "", rPass = "", feed = document.getElementById("feed");
+            var auth = $("#auth"), pass = $("#password"), htua = $("#htua"), sub = $("#sub");
+            var dropdown = $("#dropdownMenuButton"), dropdownItems = $(".dropdown-item");
+            dropdownItems.click(function(){
+                dropdown.text = $(this).text;
+            });
             var WS = function () {
                 var nws = new WebSocket("ws://" + window.location.host + "/ws-phone");
-                nws.onmessage( function(msg) {
+                nws.onmessage =  function(msg) {
                     obj = JSON.parse(msg.data);
                     if (obj.Type != "init" && obj.Type != "error" && obj.Pass == rPass) {
                         feed.innerHTML += "<div class=\"confirm\">" + obj.Message + "</div>";
                     } else if (obj.Type == "init") {
                         if (obj.Message.toLowerCase() == "connected") {
                             rPass = obj.Pass;
+                            htua.css("display", "none");
+                            auth.css("display", "");
                         } else {
                             feed.innerHTML += "<div class=\"error\">" + obj.Message + "</div>";
                         }
                     } else {
                         feed.innerHTML += "<div class=\"error\">" + obj.Message + "</div>";
                     }
-                });
+                };
                 return nws;
             };
             var ws = WS();
-            setInterval( function() {
-                if (rPass == lPass) {
-                    
+            var sendMessage = function(obj) {
+                if (typeof obj === 'string') {
+                    ws.send(obj)
                 } else {
-
+                    ws.send(JSON.stringify(obj))
+                }
+            };
+            sub.click(function(){
+                if (auth.css("display").toLowerCase() == "none") {
+                    sendMessage({"Message":"", "Type":"init", "Number":"", "Pass":pass.val()})
+                } else {
+                    sendMessage({"Message":"", "Type":"init", "Number":"", "Pass":pass.val()})
                 }
             });
         </script>
