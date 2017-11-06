@@ -20,17 +20,10 @@ type datAuth struct {
 }
 
 func main() {
-	/*var artist, title, keys, span, from, to string //Variables to hold the command line args corresponding to
-	flag.StringVar(&artist, "artist", "", "The name of the artist of the song you want to lookup")
-	flag.StringVar(&title, "title", "", "The name of the song you want to lookup")
-	flag.StringVar(&to, "to", "", "The phone number you're sending to in the format '+(Country Code)(Area Code)(Phone Number)', ex. '+17015559999")
-	flag.StringVar(&from, "from", "", "The twilio number you're sending from, if not included, it's assumed that you have it in your keys .json file")
-	flag.StringVar(&keys, "keys", "", "The location of the keys for the Twilio and MusixMatch API's, json should look like: ")
-	flag.StringVar(&span, "span", "", "The time span over which the lyrics are to be sent every 'span' / 'number of verses' amount of time")
-	flag.Parse()*/
-	fullPath := strings.Join(os.Args[1:], "")
-	go fmt.Printf("Reading %s\n", fullPath)
-	//Reading the data in from the location specified by the "keys" argument
+	fullPath := strings.Join(os.Args[1:], "") //Join together the path provided by cmd args index 1 to end
+	go fmt.Printf("Reading %s\n", fullPath)   //Print out the path for user
+
+	//Reading the data in from the location specified by command line argument
 	var dat datAuth
 	bdata, err := ioutil.ReadFile(fullPath)
 	if err != nil {
@@ -41,13 +34,6 @@ func main() {
 	if json.Unmarshal(bdata, &dat) != nil {
 		log.Fatal("Error Unmarshalling the data")
 	}
-
-	/*/Making sure that there is a sending Twilio number
-	if from == "" && dat.Number != "" {
-		from = dat.Number
-	} else if from == "" && dat.Number == "" {
-		log.Fatal("Need a sending Twilio number")
-	}*/
 
 	//Get the ID, and then get the lyrics with the returning ID from that function
 	//lyrics := getSongLyrics(getSongID(artist, title, dat.Lkey), dat.Lkey)
