@@ -16,13 +16,19 @@
             <div class="row">
                 <div class="col-sm-1"></div>
                 <div class="col-sm-10">
-                    <div class="container-fluid">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                
-                            </div>
-                        </div>
+                    <pre id="feed">
+
+                    </pre>
+                    <div id="auth">
+                        <input type="text" id=""><input/>
+                        <input type="text" id=""><input/>
+                        <input type="text" id=""><input/>
+                        <input type="text" id=""><input/>
                     </div>
+                    <div id="htua">
+                        <input type="text" id="password"><input/>
+                    </div>
+                    
                 </div>
                 <div class="col-sm-1"></div>
             </div>
@@ -33,7 +39,17 @@
                 var nws = new WebSocket("ws://" + window.location.host + "/ws-phone");
                 nws.onmessage( function(msg) {
                     obj = JSON.parse(msg.data);
+                    if (obj.Pass == rPass) {
+                        
+                    } else if (obj.Type == "init") {
+                        if (obj.Message.toLowerCase() == "connected") {
+                            
+                        } else {
 
+                        }
+                    } else {
+
+                    }
                 });
                 return nws;
             };
