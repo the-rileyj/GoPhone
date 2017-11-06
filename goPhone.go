@@ -3,21 +3,27 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"log"
-	"net/url"
 	"os"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	"github.com/olahol/melody"
 
 	twilio "github.com/saintpete/twilio-go"
 )
 
 //Struct to hold the various key data
 type datAuth struct {
+	Number string `json:"number"`
+	Pass   string `json:"pass"`
 	Sid    string `json:"sid"`
 	Token  string `json:"token"`
-	Number string `json:"number"`
 }
+
+var tpl *template.Template
 
 func main() {
 	fullPath := strings.Join(os.Args[1:], "") //Join together the path provided by cmd args index 1 to end
@@ -38,12 +44,26 @@ func main() {
 	//Get the ID, and then get the lyrics with the returning ID from that function
 	//lyrics := getSongLyrics(getSongID(artist, title, dat.Lkey), dat.Lkey)
 	client := twilio.NewClient(dat.Sid, dat.Token, nil)
-	if u, err := url.Parse("http://therileyjohnson.com/public/files/mp3/freshmanEdit.mp3"); err == nil {
+	tpl := template.Must(template.New("").ParseGlob("*.gohtml"))
+	r, m := gin.Default(), melody.New()
+	//m := melody.New()
+	r.GET("/phone", func(c *gin.Context) {
+		tpl.ExecuteTemplate(c.Writer, "index.gohtml", nil)
+	})
+
+	r.GET("/ws-phone", func(c *gin.Context) {
+		m.HandleRequest(c.Writer, c.Request)
+	})
+	m.HandleMessage(func(s *melody.Session, msg []byte) {
+		m.Broadcast(msg)
+	})
+	r.Run(":5000")
+	/*if u, err := url.Parse("http://therileyjohnson.com/public/files/mp3/freshmanEdit.mp3"); err == nil {
 		jack := "+17013186329"
 		//matt := "+17014467380"
 		client.Calls.MakeCall(dat.Number, jack, u)
 	}
-	/*/Split the lyrics up by the sections of lyrics seperated by two newlines
+	//Split the lyrics up by the sections of lyrics seperated by two newlines
 	slyrics := strings.Split(lyrics, "\n\n")
 
 	//Assuring the starting date argument isn't empty and if it is defaulting to sending the lyrics right now
