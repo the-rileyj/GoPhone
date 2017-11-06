@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
 	"strings"
 
@@ -71,12 +72,82 @@ func main() {
 			switch strings.ToLower(pmsg.Type) {
 			case "init":
 				if rmsg, err := json.Marshal(phoneMessage{"Connected", "init", "", dat.Pass}); err == nil {
-					s.Write(rmsg)
+					if err = s.Write(rmsg); err != nil {
+						fmt.Printf("Error sending websocket message: %s\n", err)
+					}
 				} else {
 					fmt.Printf("Error Marshalling outgoing message: %s\n", err)
 				}
+			case "sms":
+				_, err := client.Messages.SendMessage(dat.Number, pmsg.Number, pmsg.Message, nil)
+				if err != nil {
+					emsg := fmt.Sprintf("Error sending sms message: %s\n", err)
+					fmt.Printf(emsg)
+					if rmsg, err := json.Marshal(phoneMessage{emsg, "error", "", dat.Pass}); err == nil {
+						if err = s.Write(rmsg); err != nil {
+							fmt.Printf("Error sending websocket error message: %s\n", err)
+						}
+					} else {
+						fmt.Printf("Error Marshalling outgoing error message: %s\n", err)
+					}
+				} else {
+					if rmsg, err := json.Marshal(phoneMessage{pmsg.Message, "confirm", pmsg.Number, dat.Pass}); err == nil {
+						if err = m.Broadcast(rmsg); err != nil {
+							fmt.Printf("Error sending websocket confirm message: %s\n", err)
+						}
+					} else {
+						fmt.Printf("Error Marshalling outgoing confirm message: %s\n", err)
+					}
+				}
+			case "call":
+				if pmsg.Message != "" {
+					if u, err := url.Parse(pmsg.Message); err == nil {
+						if _, err := client.Calls.MakeCall(dat.Number, pmsg.Number, u); err != nil {
+							if rmsg, err := json.Marshal(phoneMessage{fmt.Sprintf("Error making outgoing call: %s\n", err), "error", pmsg.Number, dat.Pass}); err == nil {
+								if err = m.Broadcast(rmsg); err != nil {
+									fmt.Printf("Error sending websocket confirm error making outgoing call: %s\n", err)
+								}
+							} else {
+								fmt.Printf("Error Marshalling outgoing confirm error making outgoing call: %s\n", err)
+							}
+						} else {
+							if rmsg, err := json.Marshal(phoneMessage{pmsg.Message, "confirm", pmsg.Number, dat.Pass}); err == nil {
+								if err = m.Broadcast(rmsg); err != nil {
+									fmt.Printf("Error sending websocket confirm making outgoing call: %s\n", err)
+								}
+							} else {
+								fmt.Printf("Error Marshalling outgoing confirm making outgoing call: %s\n", err)
+							}
+						}
+					} else {
+						if rmsg, err := json.Marshal(phoneMessage{fmt.Sprintf("Error parsing the url for the call: %s\n", err), "error", pmsg.Number, dat.Pass}); err == nil {
+							if err = m.Broadcast(rmsg); err != nil {
+								fmt.Printf("Error sending websocket confirm message: %s\n", err)
+							}
+						} else {
+							fmt.Printf("Error Marshalling outgoing confirm message: %s\n", err)
+						}
+					}
+				} else {
+					if _, err := client.Calls.MakeCall(dat.Number, pmsg.Number, nil); err != nil {
+						if rmsg, err := json.Marshal(phoneMessage{fmt.Sprintf("Error making outgoing call: %s\n", err), "error", pmsg.Number, dat.Pass}); err == nil {
+							if err = m.Broadcast(rmsg); err != nil {
+								fmt.Printf("Error sending websocket confirm error making outgoing call: %s\n", err)
+							}
+						} else {
+							fmt.Printf("Error Marshalling outgoing confirm error making outgoing call: %s\n", err)
+						}
+					} else {
+						if rmsg, err := json.Marshal(phoneMessage{pmsg.Message, "confirm", pmsg.Number, dat.Pass}); err == nil {
+							if err = m.Broadcast(rmsg); err != nil {
+								fmt.Printf("Error sending websocket confirm making outgoing call: %s\n", err)
+							}
+						} else {
+							fmt.Printf("Error Marshalling outgoing confirm making outgoing call: %s\n", err)
+						}
+					}
+				}
 			}
-			m.Broadcast(msg)
 		}
 	})
 	r.Run(":5000")
