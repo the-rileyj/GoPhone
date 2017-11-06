@@ -62,7 +62,22 @@ func main() {
 		m.HandleRequest(c.Writer, c.Request)
 	})
 	m.HandleMessage(func(s *melody.Session, msg []byte) {
-		m.Broadcast(msg)
+		var pmsg phoneMessage
+		if json.Unmarshal(msg, &pmsg) != nil {
+			fmt.Println("Error unmarshalling JSON:", err)
+			return
+		}
+		if pmsg.Pass == dat.Pass {
+			switch strings.ToLower(pmsg.Type) {
+			case "init":
+				if rmsg, err := json.Marshal(phoneMessage{"Connected", "init", "", dat.Pass}); err == nil {
+					s.Write(rmsg)
+				} else {
+					fmt.Printf("Error Marshalling outgoing message: %s\n", err)
+				}
+			}
+			m.Broadcast(msg)
+		}
 	})
 	r.Run(":5000")
 	/*if u, err := url.Parse("http://therileyjohnson.com/public/files/mp3/freshmanEdit.mp3"); err == nil {

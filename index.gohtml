@@ -12,6 +12,39 @@
         <link href="https://fonts.googleapis.com/css?family=Oswald" type="text/css" rel="stylesheet">
     </head>
     <body>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-1"></div>
+                <div class="col-sm-10">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-1"></div>
+            </div>
+        </div>
+        <script>
+            var lPass = "", rPass = "";
+            var WS = function () {
+                var nws = new WebSocket("ws://" + window.location.host + "/ws-phone");
+                nws.onmessage( function(msg) {
+                    obj = JSON.parse(msg.data);
 
+                });
+                return nws;
+            };
+            var ws = WS();
+            setInterval( function() {
+                if (rPass == lPass) {
+                    
+                } else {
+
+                }
+            });
+        </script>
     </body>
 </html>
