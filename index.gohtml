@@ -80,7 +80,7 @@
                 if (auth.css("display").toLowerCase() == "none") {
                     sendMessage({"Message":"", "Type":"init", "Number":"", "Pass":pass.val()});
                 } else {
-                    sendMessage({"Message":mssg.val(), "Type":dropdown.text().toLowerCase(), "Number":to.val(), "Pass":rPass})
+                    sendMessage({"Message":mssg.val(), "Type":dropdown.text().toLowerCase().trim(), "Number":to.val(), "Pass":rPass})
                 }
             });
         </script>
