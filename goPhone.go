@@ -78,7 +78,7 @@ func main() {
 				} else {
 					fmt.Printf("Error Marshalling outgoing message: %s\n", err)
 				}
-			case "sms":
+			case "text":
 				_, err := client.Messages.SendMessage(dat.Number, pmsg.Number, pmsg.Message, nil)
 				if err != nil {
 					emsg := fmt.Sprintf("Error sending sms message: %s\n", err)

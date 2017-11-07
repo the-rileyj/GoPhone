@@ -29,12 +29,11 @@
                                 <a class="dropdown-item">Text</a>
                             </div>
                         </div>
-                        <input type="text" id="type" placeholder="Call/Text"></input>
-                        <input type="text" id="to"></input>
-                        <input type="text" id="message"></input>
+                        <input type="text" id="to" placeholder="Phone To"></input>
+                        <input type="text" id="message" placeholder="Message"></input>
                     </div>
                     <div id="htua">
-                        <input type="text" id="password"></input>
+                        <input type="password" id="password" placeholder="Password"></input>
                     </div>
                     <button id="sub">Submit</button>
                 </div>
@@ -45,8 +44,9 @@
             var lPass = "", rPass = "", feed = document.getElementById("feed");
             var auth = $("#auth"), pass = $("#password"), htua = $("#htua"), sub = $("#sub");
             var dropdown = $("#dropdownMenuButton"), dropdownItems = $(".dropdown-item");
+            var to = $("#to"), mssg = $("#message");
             dropdownItems.click(function(){
-                dropdown.text = $(this).text;
+                dropdown.text($(this).text());
             });
             var WS = function () {
                 var nws = new WebSocket("ws://" + window.location.host + "/ws-phone");
@@ -78,9 +78,9 @@
             };
             sub.click(function(){
                 if (auth.css("display").toLowerCase() == "none") {
-                    sendMessage({"Message":"", "Type":"init", "Number":"", "Pass":pass.val()})
+                    sendMessage({"Message":"", "Type":"init", "Number":"", "Pass":pass.val()});
                 } else {
-                    //sendMessage({"Message":"", "Type":"init", "Number":"", "Pass":pass.val()})
+                    sendMessage({"Message":mssg.val(), "Type":dropdown.text().toLowerCase(), "Number":to.val(), "Pass":rPass})
                 }
             });
         </script>
