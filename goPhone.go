@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/olahol/melody"
 
@@ -54,9 +55,16 @@ func main() {
 		tpl.ExecuteTemplate(c.Writer, "index.gohtml", nil)
 	})
 
+	r.Use(func(c *gin.Context) {
+		fmt.Println(c.Request.URL.Path)
+	})
+
+	r.GET("/public/:fi", static.Serve("/public", static.LocalFile("public/", true)))
+
 	r.GET("/ws-phone", func(c *gin.Context) {
 		m.HandleRequest(c.Writer, c.Request)
 	})
+
 	m.HandleMessage(func(s *melody.Session, msg []byte) {
 		var pmsg phoneMessage
 		if json.Unmarshal(msg, &pmsg) != nil {
