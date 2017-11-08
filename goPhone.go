@@ -50,30 +50,38 @@ func main() {
 		log.Fatal("Error Unmarshalling the data")
 	}
 
+	/*Instantiating variables
+	  client	- twilio client 			- sending text and making calls
+	  m			- melody websocket handler	- handles websockets, very cool
+	  r			- gin router				- for various routes and middleware
+	  tpl		- templating				- variable that holds templating
+	*/
 	client, m, r, tpl := twilio.NewClient(dat.Sid, dat.Token, nil), melody.New(), gin.Default(), template.Must(template.New("").ParseGlob("*.gohtml"))
 	r.GET("/phone", func(c *gin.Context) {
 		tpl.ExecuteTemplate(c.Writer, "index.gohtml", nil)
 	})
 
-	r.Use(func(c *gin.Context) {
-		fmt.Println(c.Request.URL.Path)
-	})
-
+	//Route for public files, aka files in the public folder
 	r.GET("/public/:fi", static.Serve("/public", static.LocalFile("public/", true)))
 
+	//Handles initial websocket connection
 	r.GET("/ws-phone", func(c *gin.Context) {
 		m.HandleRequest(c.Writer, c.Request)
 	})
 
+	//Handles an incomming message, could be put in seperate function if you're so inclined
 	m.HandleMessage(func(s *melody.Session, msg []byte) {
+		//Unmarshal incoming message into phoneMessage struct
 		var pmsg phoneMessage
 		if json.Unmarshal(msg, &pmsg) != nil {
 			fmt.Println("Error unmarshalling JSON:", err)
 			return
 		}
+
+		//Checking if message password is the same as the incoming, assumes it's a failed authentication attempt
 		if pmsg.Pass == dat.Pass {
-			switch strings.ToLower(pmsg.Type) {
-			case "init":
+			switch strings.ToLower(pmsg.Type) { //Switch on the type of message
+			case "init": //Initial authentication, sends back connection message
 				if rmsg, err := json.Marshal(phoneMessage{"Connected", "init", "", dat.Pass}); err == nil {
 					if err = s.Write(rmsg); err != nil {
 						fmt.Printf("Error sending websocket message: %s\n", err)
@@ -81,7 +89,7 @@ func main() {
 				} else {
 					fmt.Printf("Error Marshalling outgoing message: %s\n", err)
 				}
-			case "text":
+			case "text": //Handles an outgoing text
 				_, err := client.Messages.SendMessage(dat.Number, pmsg.Number, pmsg.Message, nil)
 				if err != nil {
 					emsg := fmt.Sprintf("Error sending sms message: %s\n", err)
@@ -102,7 +110,7 @@ func main() {
 						fmt.Printf("Error Marshalling outgoing confirm message: %s\n", err)
 					}
 				}
-			case "call":
+			case "call": //Handles an outgoing call
 				if pmsg.Message != "" {
 					if u, err := url.Parse(pmsg.Message); err == nil {
 						if _, err := client.Calls.MakeCall(dat.Number, pmsg.Number, u); err != nil {

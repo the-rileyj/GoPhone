@@ -1,88 +1,90 @@
 <!DOCTYPE HTML>
 <html>
-    <head>
-        <title>Simple Phone</title>
-        <link rel="shortcut icon" type="image/png" href="favicon.ico">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-        <link rel="stylesheet" href="/public/goPhone.css">
-        <link href="https://fonts.googleapis.com/css?family=Oswald" type="text/css" rel="stylesheet">
-    </head>
-    <body>
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-sm-1"></div>
-                <div class="col-sm-10">
-                    <pre id="feed">
 
-                    </pre>
-                    <div id="auth" style="display: none;">
-                        <div class="dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Text
-                            </button>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item">Call</a>
-                                <a class="dropdown-item">Text</a>
-                            </div>
+<head>
+    <title>Simple Phone</title>
+    <link rel="shortcut icon" type="image/png" href="favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/public/goPhone.css">
+    <link href="https://fonts.googleapis.com/css?family=Oswald" type="text/css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-10">
+                <pre id="feed"></pre>
+                <div id="auth" style="display: none;">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false">
+                            Text
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item" href="#">Call</a>
+                            <a class="dropdown-item" href="#">Text</a>
                         </div>
-                        <input type="text" id="to" placeholder="Phone To"></input>
-                        <input type="text" id="message" placeholder="Message"></input>
                     </div>
-                    <div id="htua">
-                        <input type="password" id="password" placeholder="Password"></input>
-                    </div>
-                    <button id="sub">Submit</button>
+                    <input type="text" id="to" placeholder="Phone To"></input>
+                    <input type="text" id="message" placeholder="Message"></input>
                 </div>
-                <div class="col-sm-1"></div>
+                <div id="htua">
+                    <input type="password" id="password" placeholder="Password"></input>
+                </div>
+                <button id="sub">Submit</button>
             </div>
+            <div class="col-sm-1"></div>
         </div>
-        <script>
-            var lPass = "", rPass = "", feed = document.getElementById("feed");
-            var auth = $("#auth"), pass = $("#password"), htua = $("#htua"), sub = $("#sub");
-            var dropdown = $("#dropdownMenuButton"), dropdownItems = $(".dropdown-item");
-            var to = $("#to"), mssg = $("#message");
-            dropdownItems.click(function(){
-                dropdown.text($(this).text());
-            });
-            var WS = function () {
-                var nws = new WebSocket("ws://" + window.location.host + "/ws-phone");
-                nws.onmessage =  function(msg) {
-                    obj = JSON.parse(msg.data);
-                    if (obj.Type != "init" && obj.Type != "error" && obj.Pass == rPass) {
-                        feed.innerHTML += "<div class=\"confirm\">" + obj.Message + "</div>";
-                    } else if (obj.Type == "init") {
-                        if (obj.Message.toLowerCase() == "connected") {
-                            rPass = obj.Pass;
-                            htua.css("display", "none");
-                            auth.css("display", "");
-                        } else {
-                            feed.innerHTML += "<div class=\"error\">" + obj.Message + "</div>";
-                        }
+    </div>
+    <script>
+        var lPass = "", rPass = "", feed = document.getElementById("feed");
+        var auth = $("#auth"), pass = $("#password"), htua = $("#htua"), sub = $("#sub");
+        var dropdown = $("#dropdownMenuButton"), dropdownItems = $(".dropdown-item");
+        var to = $("#to"), mssg = $("#message");
+        dropdownItems.click(function () {
+            dropdown.text($(this).text());
+        });
+        var WS = function () {
+            var nws = new WebSocket("ws://" + window.location.host + "/ws-phone");
+            nws.onmessage = function (msg) {
+                obj = JSON.parse(msg.data);
+                if (obj.Type != "init" && obj.Type != "error" && obj.Pass == rPass) {
+                    feed.innerHTML += "<div class=\"confirm\">" + obj.Message + "</div>";
+                } else if (obj.Type == "init") {
+                    if (obj.Message.toLowerCase() == "connected") {
+                        rPass = obj.Pass;
+                        htua.css("display", "none");
+                        auth.css("display", "");
                     } else {
                         feed.innerHTML += "<div class=\"error\">" + obj.Message + "</div>";
                     }
-                };
-                return nws;
-            };
-            var ws = WS();
-            var sendMessage = function(obj) {
-                if (typeof obj === 'string') {
-                    ws.send(obj)
                 } else {
-                    ws.send(JSON.stringify(obj))
+                    feed.innerHTML += "<div class=\"error\">" + obj.Message + "</div>";
                 }
             };
-            sub.click(function(){
-                if (auth.css("display").toLowerCase() == "none") {
-                    sendMessage({"Message":"", "Type":"init", "Number":"", "Pass":pass.val()});
-                } else {
-                    sendMessage({"Message":mssg.val(), "Type":dropdown.text().toLowerCase().trim(), "Number":to.val(), "Pass":rPass})
-                }
-            });
-        </script>
-    </body>
+            return nws;
+        };
+        var ws = WS();
+        var sendMessage = function (obj) {
+            if (typeof obj === 'string') {
+                ws.send(obj)
+            } else {
+                ws.send(JSON.stringify(obj))
+            }
+        };
+        sub.click(function () {
+            if (auth.css("display").toLowerCase() == "none") {
+                sendMessage({ "Message": "", "Type": "init", "Number": "", "Pass": pass.val() });
+            } else {
+                sendMessage({ "Message": mssg.val(), "Type": dropdown.text().toLowerCase().trim(), "Number": to.val(), "Pass": rPass })
+            }
+        });
+    </script>
+</body>
+
 </html>
